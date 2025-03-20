@@ -6,11 +6,12 @@ class User(db.Model):
     password = db.Column(db.String(90), nullable=False)
     fullname = db.Column(db.String(90), nullable=False)
     qualification = db.Column(db.String, nullable=True)
-    dob = db.Column(db.Date)
+    dob = db.Column(db.Date) #date of birth
 
     scores = db.relationship('Score', backref='user', lazy=True)# backref -> if u have the score object u can access the user object . if we dont have the backref we can't access the user object from the score object
-    #lazy -> how the related object will be loaded. it must need to fetch all the records from the database. lazy=True -> fetch all the records from the database
-
+    #lazy -> how the related object will be loaded. it must need to fetch all the records from the database. lazy=True -> fetch all the records from the database at once when we not need it . lazy=False -> fetch the records from the database when we need it.
+    #db.model => tanslate the user model into the database table
+    #db.session => query the database.
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(90), nullable=False)
