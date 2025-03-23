@@ -1,0 +1,25 @@
+{%extends "layout.html"%}
+{%block content%}
+<h1>Manage Subjects</h1>
+<p>Here you can manage subjects.</p>
+<table>
+    <thead>
+        <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for subject in subjects %}
+        <tr>
+            <td>{{subject.id}}</td>
+            <td>{{subject.name}}</td>
+            <td>{{subject.description}}</td>
+            <td><a href="#">Edit</a></td>
+             <td><a href="#">Delete</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{%endblock%}

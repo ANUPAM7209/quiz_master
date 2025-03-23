@@ -18,5 +18,7 @@ class LoginForm(FlaskForm): # instance of the form class
     password = PasswordField('Password', validators=[Length(min=8)]) #password field
     remember = BooleanField('Remember Me') #remember me field
     submit = SubmitField('Login') #submit button
+
+
 # How we use that form in the routes.py file:
 # from app.forms import RegisterForm, LoginForm
