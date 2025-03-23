@@ -4,14 +4,44 @@
     {% block head %}
     <title>{% block title %}{% endblock %} - Quiz Master</title>
     {% endblock %}
+    <style>
+      .errors {
+        color: red;
+        font-size: 13px;
+      } 
+      .flashes .success {
+        font-size: 13px;
+        color: green;
+      }
+      .flashes .error {
+        font-size: 13px;
+        color: red;
+      }
+    </style>
+
   </head>
   <body>
-    <ul>
-      <li><a herf="{{ url_for('home') }}">Home</a></li>
-      <li><a herf="{{ url_for('register') }}">Register</a></li>
-      <li><a herf="{{ url_for('login') }}">Login</a></li>
+    {% with messages = get_flashed_messages(with_categories=true)%}
+      {%if messages%}
+        <ul class=flashes>
+          {%for category, message in messages%}
+            <li class="{{ category }}">{{ message }}</li>
+          {%endfor%}
+        </ul>
+      {%endif%}
+    {%endwith%}
+      <li><a href="{{ url_for('home') }}">Home</a></li> <!-- This will genrate the URl for the home page.-->
+      <li><a href="{{ url_for('register') }}">Register</a></li>
+      {% if current_user.is_authenticated %}
+      <li><a href="{{ url_for('logout') }}">logout</a></li>
+      {% else %}
+      <li><a href="{{ url_for('login') }}">Login</a></li>
+      {% endif %}
     </ul>
     <div id="content">
+      {% if current_user.is_authenticated %}
+        Hi{{ current_user.fullname }}!
+      {% endif %}
       {% block content %}{% endblock %}
     </div>
   </body>

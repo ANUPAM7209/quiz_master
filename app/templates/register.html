@@ -2,4 +2,77 @@
 {%block title%}Register{%endblock%}
 {%block content%}
 <h1>User Register</h1>
+<form method="post">
+    {{ form.hidden_tag() }}  <!--hidden tag for CSRF protection-->
+    <!--display form fields-->
+    <div>
+        {{ form.username.label }}<br> <!--display label , Email-->
+        {{ form.username(size=32) }} <!--display input field, Email-->
+        {% if form.username.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.username.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.password.label }}<br> <!--display label , Password-->
+        {{ form.password(size=32) }} <!--display input field, Password-->
+        {% if form.password.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.password.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.confirm_password.label }}<br> <!--display label , Confirm Password-->
+        {{ form.confirm_password(size=32) }} <!--display input field, Confirm Password-->
+        {% if form.confirm_password.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.confirm_password.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.fullname.label }}<br> <!--display label , Full Name-->
+        {{ form.fullname(size=32) }} <!--display input field, Full Name-->
+        {% if form.fullname.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.fullname.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.qualification.label }}<br> <!--display label , Qualification-->
+        {{ form.qualification(size=32) }} <!--display input field, Qualification-->
+        {% if form.qualification.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.qualification.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.dob.label }}<br> <!--display label , Date of Birth-->
+        {{ form.dob(size=32) }} <!--display input field, Date of Birth-->
+        {% if form.dob.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.dob.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.submit }} <!--display submit button-->
+    </div>
+</form>
 {% endblock %}
