@@ -4,19 +4,8 @@
 <style>
     .container {
         display: flex;
-        justify-content: center;
     }
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-    li {
-        padding: 10px;
-        border: 1px solid #ccc;
-        margin: 5px;
-        width: 200px;
-        text-align: center;
-    }
+  
 </style>
 {% endblock %}
 
@@ -27,13 +16,14 @@
         <ul>
             <li><a href ="{{ url_for('manage_subjects')}}" >Manage Subjects</a></li>
             <li><a href ="{{ url_for('manage_chapters')}}">Manage Chapters</a></li>
+            <li><a href ="{{ url_for('manage_quizzes')}}">Manage Quizzes</a></li>
             <li><a href ="{{ url_for('manage_questions')}}">Manage Questions</a></li>
             <li><a href ="{{ url_for('manage_users')}}">Manage Users</a></li>
-            <li><a href ="{{ url_for('manage_quizzes')}}">Manage Quizzes</a></li>
             <li><a href="{{url_for('manage_scores')}}">Manage Scores</a></li>
         </ul>
         <div>
-            <p>Use the management options from sidebar</p>
+            {% block crud %}
+            {% endblock %}
         </div>
     </div>
 {% endblock %}

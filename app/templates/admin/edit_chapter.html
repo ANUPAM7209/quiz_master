@@ -1,0 +1,45 @@
+{%extends "admin/dashboard.html"%}
+{%block title%}Edit Chapter{%endblock%}
+{%block crud%}
+<h2>Edit Chapter</h2>
+<form method="post">
+    {{ form.hidden_tag() }} <!--hidden tag for CSRF protection-->
+    <!--display form fields-->
+    <div>
+        {{ form.name.label }}<br> <!--display label , Email-->
+        {{ form.name(size=32) }} <!--display input field, Email-->
+        {% if form.name.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.name.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.description.label }}<br> <!--display label , Password-->
+        {{ form.description }} <!--display input field, Password-->
+        {% if form.description.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.description.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.subject_id.label }}<br> <!--display label , Password-->
+        {{ form.subject_id }} <!--display input field, Password-->
+        {% if form.subject_id.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.subject_id.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.submit }}
+    </div>
+</form>
+{%endblock%}

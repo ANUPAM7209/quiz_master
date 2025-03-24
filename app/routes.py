@@ -1,7 +1,7 @@
 from app import create_app , db , login_manager
-from flask import render_template , url_for , redirect , flash 
+from flask import render_template , url_for , redirect , flash , request
 from app.models import User, Subject, Chapter, Question,  Quiz , Score
-from app.forms import RegisterForm, LoginForm
+from app.forms import RegisterForm, LoginForm , SubjectForm , ChapterForm , QuizForm
 from flask_login import login_user, logout_user, login_required , current_user
 import os
 
@@ -67,6 +67,59 @@ def manage_subjects():
     subjects =  Subject.query.all()
     return render_template('admin/manage_subjects.html' , subjects = subjects)
 
+#CRUD operations for the subject
+#add the subject
+@app.route("/admin/add_subject" , methods = ['GET' , 'POST'])
+@login_required
+def add_subject():
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    form = SubjectForm()
+    if form.validate_on_submit():
+        subject = Subject(
+            name = form.name.data,
+            description = form.description.data
+        )#create the subject object
+        db.session.add(subject) #add the subject object to the session, store the object in the database
+        db.session.commit() #commit the session
+        flash('Subject added successfully!' , category='success')
+        return redirect(url_for('manage_subjects')) #redirect to the manage_subjects page
+    return render_template('admin/add_subject.html' , form = form)
+
+#edit the subject
+@app.route("/admin/edit_subject/<int:id>" , methods = ['GET' , 'POST'])
+@login_required
+def edit_subject(id):
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    subject = Subject.query.get_or_404(id) #fetch the subject object from the database, if the object is not present then return 404
+    form = SubjectForm(obj=subject) #create the instance of the form , initialize the form object , fill the form with the data
+    if form.validate_on_submit():
+        #update the subject object
+        subject.name = form.name.data
+        subject.description = form.description.data
+        db.session.commit() #commit the session
+        flash('Subject updated successfully!' , category='success')
+        return redirect(url_for('manage_subjects')) #redirect to the manage_subjects page
+    return render_template('admin/edit_subject.html' , form = form)
+
+
+#delete the subject
+@app.route("/admin/delete_subject/<int:id>" , methods = ['POST']) #id is the primary key of the subject object
+@login_required
+def delete_subject(id):
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    subject = Subject.query.get_or_404(id) #fetch the subject object from the database, if the object is not present then return 404
+    db.session.delete(subject) #delete the subject object
+    db.session.commit() #commit the session
+    flash('Subject deleted successfully!' , category='success')
+    return redirect(url_for('manage_subjects')) #redirect to the manage_subjects page
+
+
 @app.route('/admin/manage_chapters')
 @login_required
 def manage_chapters():
@@ -76,6 +129,62 @@ def manage_chapters():
     chapters = Chapter.query.all()
     return render_template('admin/manage_chapters.html' , chapters = chapters)
 
+#CRUD operations for the chapters
+#add the chapter
+@app.route("/admin/add_chapter" , methods = ['GET' , 'POST'])
+@login_required
+def add_chapter():
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    form = ChapterForm()
+    form.subject_id.choices = [(s.id , s.name) for s in Subject.query.all()] #fetch the subject id and the subject name from the database
+    if form.validate_on_submit():
+        chapter = Chapter(
+            name = form.name.data,
+            description = form.description.data,
+            subject_id = form.subject_id.data
+        )
+        db.session.add(chapter) #add the chapter object to the session
+        db.session.commit() #commit the session
+        flash('Chapter added successfully!' , category='success')
+        return redirect(url_for('manage_chapters')) #redirect to the manage_chapters page
+    return render_template('admin/add_chapter.html' , form = form)
+
+#edit the chapters
+@app.route("/admin/edit_chapter/<int:id>" , methods = ['GET' , 'POST'])
+@login_required
+def edit_chapter(id):
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    chapter = Chapter.query.get_or_404(id) #fetch the chapter object from the database, if the object is not present then return 404
+    form = ChapterForm(obj=chapter) #create the instance of the form , initialize the form object , fill the form with the data
+    form.subject_id.choices = [(s.id , s.name) for s in Subject.query.all()] #fetch the subject id and the subject name from the database
+    if form.validate_on_submit():
+        #update the chapter object
+        chapter.name = form.name.data
+        chapter.description = form.description.data
+        chapter.subject_id = form.subject_id.data
+        db.session.commit()
+        flash('Chapter updated successfully!' , category='success')
+        return redirect(url_for('manage_chapters')) #redirect to the manage_chapters page
+    return render_template('admin/edit_chapter.html' , form = form)
+
+#delete the chapter
+@app.route("/admin/delete_chapter/<int:id>" , methods = ['POST']) #id is the primary key of the chapter object
+@login_required
+def delete_chapter(id): 
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    chapter = Chapter.query.get_or_404(id)
+    db.session.delete(chapter) #delete the chapter object
+    db.session.commit() #commit the session
+    flash('Chapter deleted successfully!' , category='success')
+    return redirect(url_for('manage_chapters')) #redirect to the manage_chapters page
+
+
 @app.route('/admin/manage_quizzes')
 @login_required
 def manage_quizzes():
@@ -83,7 +192,63 @@ def manage_quizzes():
         flash('You are not authorized to view this page!' , category='error')
         return redirect(url_for('home')) #redirect to the home page
     quizzes = Quiz.query.all()
-    return render_template('admin/manage_chapters.html' , quizzes = quizzes) # fetch the data and supply to the params
+    return render_template('admin/manage_quizzes.html' , quizzes = quizzes) # fetch the data and supply to the params
+
+#CRUD operations for the quizzes
+#add the quiz
+@app.route("/admin/add_quiz" , methods = ['GET' , 'POST'])
+@login_required
+def add_quiz(): 
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    form = QuizForm()
+    form.chapter_id.choices = [(c.id , c.name) for c in Chapter.query.all()] #fetch the chapter id and the chapter name from the database
+    if form.validate_on_submit():
+        quiz = Quiz(
+            date_of_quiz = form.date_of_quiz.data,
+            time_duration = form.time_duration.data,
+            chapter_id = form.chapter_id.data
+        )
+        db.session.add(quiz) #add the quiz object to the session
+        db.session.commit() #commit the session
+        flash('Quiz added successfully!' , category='success')
+        return redirect(url_for('manage_quizzes')) #redirect to the manage_quizzes page
+    return render_template('admin/add_quiz.html' , form = form)
+
+#edit the quiz
+@app.route("/admin/edit_quiz/<int:id>" , methods = ['GET' , 'POST'])
+@login_required
+def edit_quiz(id):
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    quiz = Quiz.query.get_or_404(id) #fetch the quiz object from the database, if the object is not present then return 404
+    form = QuizForm(obj=quiz) #create the instance of the form , initialize the form object , fill the form with the data
+    form.chapter_id.choices = [(c.id , c.name) for c in Chapter.query.all()] #fetch the chapter id and the chapter name from the database
+    if form.validate_on_submit():    
+        #update the quiz object
+        quiz.name = form.name.data
+        quiz.date_of_quiz = form.date_of_quiz.data
+        quiz.time_duration = form.time_duration.data
+        quiz.chapter_id = form.chapter_id.data
+        db.session.commit()
+        flash('Quiz updated successfully!' , category='success')
+        return redirect(url_for('manage_quizzes')) #redirect to the manage_quizzes page
+    return render_template('admin/edit_quiz.html' , form = form)
+
+#delete the quiz
+@app.route("/admin/delete_quiz/<int:id>" , methods = ['POST']) #id is the primary key of the quiz object
+@login_required
+def delete_quiz(id):
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    quiz = Quiz.query.get_or_404(id) #fetch the quiz object from the database, if the object is not present then return 404
+    db.session.delete(quiz) #delete the quiz object
+    db.session.commit() #commit the session
+    flash('Quiz deleted successfully!' , category='success')
+    return redirect(url_for('manage_quizzes')) #redirect to the manage_quizzes page     
         
 @app.route('/admin/manage_questions')
 @login_required
