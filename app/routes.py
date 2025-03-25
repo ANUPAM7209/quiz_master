@@ -1,7 +1,7 @@
 from app import create_app , db , login_manager
 from flask import render_template , url_for , redirect , flash , request
 from app.models import User, Subject, Chapter, Question,  Quiz , Score
-from app.forms import RegisterForm, LoginForm , SubjectForm , ChapterForm , QuizForm
+from app.forms import RegisterForm, LoginForm , SubjectForm , ChapterForm , QuizForm , QuestionForm
 from flask_login import login_user, logout_user, login_required , current_user
 import os
 
@@ -37,6 +37,16 @@ def create_db(): #handler for about command
 def home():
     return render_template('home.html') #render the home.html file in the templates folder
 
+#Authentication routes
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user() #destroy the session for the user
+    flash('You have been logged out!' , category='success')
+    return redirect(url_for('login')) #redirect to the login page
+#Admin Authentication routes
 @app.route('/admin/login' , methods = ['GET' , 'POST'])
 def admin_login():
     form = LoginForm()
@@ -206,6 +216,7 @@ def add_quiz():
     form.chapter_id.choices = [(c.id , c.name) for c in Chapter.query.all()] #fetch the chapter id and the chapter name from the database
     if form.validate_on_submit():
         quiz = Quiz(
+            name = form.name.data,
             date_of_quiz = form.date_of_quiz.data,
             time_duration = form.time_duration.data,
             chapter_id = form.chapter_id.data
@@ -250,14 +261,6 @@ def delete_quiz(id):
     flash('Quiz deleted successfully!' , category='success')
     return redirect(url_for('manage_quizzes')) #redirect to the manage_quizzes page     
         
-@app.route('/admin/manage_questions')
-@login_required
-def manage_questions():
-    if current_user.username != os.getenv('ADMIN_USERNAME'):
-        flash('You are not authorized to view this page!' , category='error')
-        return redirect(url_for('home'))
-    questions = Question.query.all()
-    return render_template('admin/manage_questions.html' , questions= questions)
 
 @app.route('/admin/manage_users')
 @login_required
@@ -268,16 +271,42 @@ def manage_users():
     users = User.query.all()
     return render_template('admin/manage_users.html' , users = users)
 
-@app.route('/admin/manage_scores')
+@app.route('/admin/manage_quiz_questions/<int:quiz_id>')
 @login_required
-def manage_scores():
-    if current_user.username !=os.getenv('ADMIN_USERNAME'):
+def manage_quiz_questions(quiz_id):
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
         flash('You are not authorized to view this page!' , category='error')
         return redirect(url_for('home'))
-    scores = Score.query.all()
-    return render_template('admin/manage_scores.html' , scores = scores)
+    quiz = Quiz.query.get_or_404(quiz_id) #fetch the quiz object from the database, if the object is not present then return 404
+    questions = quiz.questions #fetch the questions of the quiz
+    return render_template('admin/manage_quiz_questions.html' , quiz = quiz , questions = questions)
+
+@app.route('/admin/add_question/<int:quiz_id>' , methods = ['GET' , 'POST'])
+@login_required 
+def add_question(quiz_id):
+    if current_user.username != os.getenv('ADMIN_USERNAME'):
+        flash('You are not authorized to view this page!' , category='error')
+        return redirect(url_for('home'))
+    form = QuestionForm()
+    if form.validate_on_submit(): #check if the form is submitted or not , then we have to add the question to the database
+        question = Question(
+            question_statement = form.question_statement.data,
+            option1 = form.option1.data,
+            option2 = form.option2.data,
+            option3 = form.option3.data,
+            option4 = form.option4.data,
+            correct_option = form.correct_option.data,
+            quiz_id = quiz_id
+        )
+        db.session.add(question)
+        db.session.commit()
+        flash('Question added successfully!' , category='success')
+        return redirect(url_for('manage_quiz_questions' , quiz_id = quiz_id))
+    return render_template('admin/add_question.html' , form = form , quiz_id = quiz_id)
 
 
+
+#user authentication routes
 @app.route('/register' , methods = ['GET' , 'POST'])
 def register(): 
     form = RegisterForm() #Read the register form object
@@ -313,11 +342,34 @@ def login():
 @app.route('/dashboard')
 @login_required #to check the user is logged in or not .
 def dashboard():
-    return render_template('dashboard.html')
+    quizzes = Quiz.query.all()
+    return render_template('dashboard.html', quizzes=quizzes)
 
-@app.route('/logout')
+@app.route("/quiz/<int:id>" , methods = ['GET' , 'POST'])
 @login_required
-def logout():
-    logout_user() #destroy the session for the user
-    flash('You have been logged out!' , category='success')
-    return redirect(url_for('login'))
+def attempt_quiz(quiz_id):
+    quiz = Quiz.query.get_or_404(quiz_id)
+    questions = quiz.questions  
+    if request.method == 'POST':
+        Score = 0
+        for question in questions:
+            user_answer = request.form.get(f'question_{question.id}')
+            if user_answer and int(user_answer) == question.correct_option:
+                Score += 1
+        user_score = Score(
+            total_scored = Score,
+            quiz_id = quiz_id,
+            user_id = current_user.id
+        )
+        db.session.add(user_score)
+        db.session.commit()
+        flash(f'You scored {Score} out of {len(questions)}!' , category='success')
+        return redirect(url_for('quiz_result' , quiz_id = quiz_id))
+    return render_template('attempt_quiz.html' , quiz = quiz , questions = questions)
+
+@app.route('/quiz_result/<int:quiz_id>')
+@login_required
+def quiz_result(quiz_id):
+    quiz = Quiz.query.get_or_404(quiz_id)
+    score = Score.query.filter_by(user_id = current_user.id , quiz_id = quiz_id).first()
+    return render_template('quiz_result.html' , quiz = quiz , score = score)

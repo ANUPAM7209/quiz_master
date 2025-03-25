@@ -1,0 +1,79 @@
+{%extends "admin/dashboard.html"%}
+{%block title%}Add Question{%endblock%}
+{%block crud%}
+<h2>Add Question {{ quiz_id}}</h2>
+<form method="post">
+    {{ form.hidden_tag() }} <!--hidden tag for CSRF protection-->
+    <!--display form fields-->
+
+    <div>
+        {{ form.question_statement.label }}<br> <!--display label , Email-->
+        {{ form.question_statement }} <!--display input field, Email-->
+        {% if form.question_statement.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.question_statement.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.option1.label }}<br> <!--display label , Password-->
+        {{ form.option1 }} <!--display input field, Password-->
+        {% if form.option1.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.option1.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.option2.label }}<br> <!--display label , Password-->
+        {{ form.option2 }} <!--display input field, Password-->
+        {% if form.option2.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.option2.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.option3.label }}<br> <!--display label , Password-->
+        {{ form.option3 }} <!--display input field, Password-->
+        {% if form.option3.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.option3.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.option4.label }}<br> <!--display label , Password-->
+        {{ form.option4 }} <!--display input field, Password-->
+        {% if form.option4.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.option4.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.correct_option.label }}<br> <!--display label , Password-->
+        {{ form.correct_option }} <!--display input field, Password-->
+        {% if form.correct_option.errors %} <!--display error message-->
+            <ul class="errors">
+                {% for error in form.correct_option.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <div>
+        {{ form.submit }}
+    </div>
+</form>
+{%endblock%}

@@ -37,7 +37,14 @@ class QuizForm(FlaskForm):
     chapter_id = SelectField('Chapter', coerce= int , validators=[DataRequired()]) #chapter id field , show the relationship between the quiz and the chapter , coerce -> convert the value into the integer
     submit = SubmitField('submit') #submit button
 
-
+class QuestionForm(FlaskForm):
+    question_statement = TextAreaField('Question Statement', validators=[DataRequired()]) #question statement field
+    option1 = StringField('Option 1', validators=[DataRequired()]) #option1 field
+    option2 = StringField('Option 2', validators=[DataRequired()]) #option2 field
+    option3 = StringField('Option 3', validators=[DataRequired()]) #option3 field
+    option4 = StringField('Option 4', validators=[DataRequired()]) #option4 field
+    correct_option = SelectField('Correct Option', coerce= int , validators=[DataRequired()]) #correct option field , coerce -> convert the value into the integer
+    submit = SubmitField('submit') #submit button
 
 
 
