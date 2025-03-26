@@ -1,4 +1,4 @@
-{%extends "admin/dashboard.html"%}
+{%extends "admin/layout.html"%}
 {%block title%}Add Chapter{%endblock%}
 {%block crud%}
 <h2>Add Chapter</h2>
@@ -7,7 +7,7 @@
     <!--display form fields-->
     <div>
         {{ form.name.label }}<br> <!--display label , Email-->
-        {{ form.name(size=32) }} <!--display input field, Email-->
+        {{ form.name }} <!--display input field, Email-->
         {% if form.name.errors %} <!--display error message-->
             <ul class="errors">
                 {% for error in form.name.errors %}

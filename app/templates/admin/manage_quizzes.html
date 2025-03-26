@@ -1,15 +1,21 @@
-{% extends 'admin/dashboard.html' %}
+{% extends 'admin/layout.html' %}
 {%block title %}Manage Quizzes{% endblock %}
 {% block crud %} 
+<style>
+    th:nth-last-child(1) {
+        width: 30%;
+    }
+</style>
 <h2>Manage Quizzes</h2> 
-<p>Here you can manage quizzes.</p> 
-<a href = "{{ url_for('add_quiz')}}">Add Quiz</a> 
+<a href="{{ url_for('add_quiz') }}">Add Quiz</a>
 <table>
     <thead>
         <tr>
         <th>Id</th>
+        <th>Name</th>
         <th>Date of Quiz</th>
         <th>Time Duration</th>
+        <th colspan="3">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -24,8 +30,7 @@
                     <button onclick = "return confirm('Are you sure?')">Delete</button>
             </form>
             </td>
-            <td><a href="{{ url_for('manage_quiz_questions', quiz_id=quiz.id) }}">Manage Quiz Questions</a></td>
-            
+            <td colspan="2"><a href="{{ url_for('manage_quiz_questions', quiz_id=quiz.id) }}">Manage Quiz Questions</a></td>    
         </tr>
         {% endfor %}
     </tbody>

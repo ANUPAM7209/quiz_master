@@ -3,19 +3,19 @@ from flask import render_template , url_for , redirect , flash , request
 from app.models import User, Subject, Chapter, Question,  Quiz , Score
 from app.forms import RegisterForm, LoginForm , SubjectForm , ChapterForm , QuizForm , QuestionForm
 from flask_login import login_user, logout_user, login_required , current_user
+from seed import seed_database
 import os
 
 app = create_app() #store the object of the flask app
 
 @login_manager.user_loader #to load the user
 def load_user(user_id): #to load the user that is storted in the session
-    return User.query.get(int(user_id)) #then we have to return the user object
+    return User.query.get(user_id) #then we have to return the user object
 
 @app.cli.command('create_db')  # to initlize the database . create the database tables
 def create_db(): #handler for about command
     """Create the database tables."""
     db.create_all() #create the database tables
-    print('Database created successfully!')
 
         #create the admin user
     admin = User.query.filter_by(username=os.getenv('ADMIN_USERNAME')).first() #check if the admin user is already created or not
@@ -33,6 +33,11 @@ def create_db(): #handler for about command
             print ('Admin user already exists!')
     print('Database created successfully!')
 
+@app.cli.command('db-seed')
+def seed_db():
+    seed_database()
+    print("Database seeded successfully!")
+ 
 @app.route('/')
 def home():
     return render_template('home.html') #render the home.html file in the templates folder
@@ -66,7 +71,28 @@ def admin_dashboard():
     if current_user.username != os.getenv('ADMIN_USERNAME'): #check if the current user is the admin user or not
         flash('You are not authorized to view this page!' , category='error')
         return redirect(url_for('home')) #redirect to the home page
-    return render_template('admin/dashboard.html')
+    quizzes = Quiz.query.all() #fetch the quizzes
+    quiz_names = [quiz.name for quiz in quizzes] 
+    average_scores = []
+    completion_rates = []
+ 
+    for quiz in quizzes:
+         #for calculating the  avg scores we needed  the  scores first.
+        scores = Score.query.filter_by(quiz_id=quiz.id).all()
+        if scores:
+            average_score = sum([s.total_scored for s in scores]) / len(scores)
+            users_attempted = len(scores)
+            completion_rate = (users_attempted / (User.query.count() - 1)) * 100
+        else:
+            average_score = 0 
+            completion_rate = 0
+        average_scores.append(average_score)
+        completion_rates.append(completion_rate)
+    return render_template("admin/dashboard.html",
+                            quiz_names=quiz_names,
+                            average_scores=average_scores,
+                            completion_rates=completion_rates)
+
 
 @app.route('/admin/manage_subjects')
 @login_required
@@ -75,8 +101,8 @@ def manage_subjects():
         flash('You are not authorized to view this page!' , category='error')
         return redirect(url_for('home')) #redirect to the home page
     subjects =  Subject.query.all()
-    return render_template('admin/manage_subjects.html' , subjects = subjects)
-
+    return render_template("admin/manage_subjects.html", subjects=subjects)
+    
 #CRUD operations for the subject
 #add the subject
 @app.route("/admin/add_subject" , methods = ['GET' , 'POST'])
@@ -345,31 +371,31 @@ def dashboard():
     quizzes = Quiz.query.all()
     return render_template('dashboard.html', quizzes=quizzes)
 
-@app.route("/quiz/<int:id>" , methods = ['GET' , 'POST'])
+@app.route("/quiz/<int:quiz_id>" , methods = ['GET' , 'POST'])
 @login_required
 def attempt_quiz(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)
     questions = quiz.questions  
     if request.method == 'POST':
-        Score = 0
+        score = 0
         for question in questions:
             user_answer = request.form.get(f'question_{question.id}')
             if user_answer and int(user_answer) == question.correct_option:
-                Score += 1
+                score += 1
         user_score = Score(
-            total_scored = Score,
+            total_scored = score,
             quiz_id = quiz_id,
             user_id = current_user.id
         )
         db.session.add(user_score)
         db.session.commit()
-        flash(f'You scored {Score} out of {len(questions)}!' , category='success')
+        flash(f'You scored {score} out of {len(questions)}!' , category='success')
         return redirect(url_for('quiz_result' , quiz_id = quiz_id))
     return render_template('attempt_quiz.html' , quiz = quiz , questions = questions)
 
-@app.route('/quiz_result/<int:quiz_id>')
+@app.route('/quiz_results/<int:quiz_id>')
 @login_required
-def quiz_result(quiz_id):
+def quiz_results(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)
     score = Score.query.filter_by(user_id = current_user.id , quiz_id = quiz_id).first()
-    return render_template('quiz_result.html' , quiz = quiz , score = score)
+    return render_template('quiz_results.html' , quiz = quiz , score = score)

@@ -1,26 +1,27 @@
-{%extends "admin/dashboard.html"%}
+{%extends "admin/layout.html"%}
 {%block title%}Manage Users{%endblock%}
 {%block crud%}
 <h2>Manage Users</h2>   
-<p>Here you can manage users.</p>
-<a href = #>Add User</a> 
 <table>
     <thead>
         <tr>
         <th>Id</th>
-        <th>Username</th>
+        <th colspan="2">Username</th>
         <th>Full Name</th>
-        <th>Qualification</th>
+        <th colspan="2">Qualification</th>
         <th>Date of Birth</th>
+        <th></th>
+        <th></th>
         </tr>
     </thead>
     <tbody>
         {% for user in users %}
+        {%if user.Username != "admin@quiz.com" %}
         <tr>
             <td>{{user.id}}</td>
-            <td>{{user.Username}}</td>
+            <td colspan="2">{{user.Username}}</td>
             <td>{{user.fullname}}</td>
-            <td>{{user.qualification}}</td>
+            <td colspan="2">{{user.qualification}}</td>
             <td>{{user.dob}}</td>
             <td>
                 <a href="#">Edit</a>
@@ -29,6 +30,7 @@
                 <a href="#">Delete</a>
             </td>
         </tr>
+        {% endif %}
         {% endfor %}
     </tbody>
 </table>

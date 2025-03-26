@@ -1,4 +1,4 @@
-{%extends "admin/dashboard.html"%}
+{%extends "admin/layout.html"%}
 {%block title%}Edit Quiz{%endblock%}
 {%block crud%}
 <h2>Edit Quiz</h2>
@@ -18,7 +18,7 @@
     </div>
     <div>
         {{ form.date_of_quiz.label }}<br> <!--display label , Email-->
-        {{ form.date_of_quiz(size=32) }} <!--display input field, Email-->
+        {{ form.date_of_quiz }} <!--display input field, Email-->
         {% if form.date_of_quiz.errors %} <!--display error message-->
             <ul class="errors">
                 {% for error in form.date_of_quiz.errors %}

@@ -1,27 +1,64 @@
-{% extends 'layout.html' %}
+{% extends 'admin/layout.html' %}
 {%block title%}Admin Dashboard{%endblock%}
-{%block head%}
+{%block adminHead%}
 <style>
-    .container {
-        display: flex;
+   .chart-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
     }
   
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
-{% block content %}
-    <h1>Admin Dashboard</h1>
-    <p>Welcome to the admin dashboard.</p>
-    <div class ="container">
-        <ul>
-            <li><a href ="{{ url_for('manage_subjects')}}" >Manage Subjects</a></li>
-            <li><a href ="{{ url_for('manage_chapters')}}">Manage Chapters</a></li>
-            <li><a href ="{{ url_for('manage_quizzes')}}">Manage Quizzes</a></li>
-            <li><a href ="{{ url_for('manage_users')}}">Manage Users</a></li>
-        </ul>
-        <div>
-            {% block crud %}
-            {% endblock %}
-        </div>
+{% block crud %}
+<h1>Admin Dashboard</h1>
+<p>Welcome to the admin dashboard.</p>
+<div class="chart-container">
+    <div>
+        <h4>Average Scores</h4>
+        <canvas id="averageScoresChart"></canvas>
     </div>
+    <div>
+        <h4>Completion Rates</h4>
+        <canvas id="completionRatesChart"></canvas>
+    </div>
+</div>
+
+<script>
+    // Explicitly parse JSON to prevent template errors
+    const quizData = {
+        names: {{ quiz_names|tojson|safe }},
+        scores: {{ average_scores|tojson|safe }},
+        completions: {{ completion_rates|tojson|safe }}
+    };
+
+    // Bar Chart
+    new Chart(document.getElementById('averageScoresChart'), {
+        type: 'bar',
+        data: {
+            labels: quizData.names,
+            datasets: [{
+                label: 'Average Score',
+                data: quizData.scores,
+                backgroundColor: 'rgba(255, 99, 132, 0.5)'
+            }]
+        }
+    });
+
+    // Pie Chart 
+    new Chart(document.getElementById('completionRatesChart'), {
+        type: 'pie',
+        data: {
+            labels: quizData.names,
+            datasets: [{
+                data: quizData.completions,
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56',
+                    '#4BC0C0', '#9966FF', '#FF9F40'
+                ]
+            }]
+        }
+    });
+</script>
 {% endblock %}
