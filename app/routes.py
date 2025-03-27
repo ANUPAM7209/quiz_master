@@ -4,6 +4,7 @@ from app.models import User, Subject, Chapter, Question,  Quiz , Score
 from app.forms import RegisterForm, LoginForm , SubjectForm , ChapterForm , QuizForm , QuestionForm
 from flask_login import login_user, logout_user, login_required , current_user
 from seed import seed_database
+from random import shuffle
 import os
 
 app = create_app() #store the object of the flask app
@@ -375,7 +376,8 @@ def dashboard():
 @login_required
 def attempt_quiz(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)
-    questions = quiz.questions  
+    questions = quiz.questions.copy()
+    shuffle(questions) 
     if request.method == 'POST':
         score = 0
         for question in questions:
@@ -390,7 +392,7 @@ def attempt_quiz(quiz_id):
         db.session.add(user_score)
         db.session.commit()
         flash(f'You scored {score} out of {len(questions)}!' , category='success')
-        return redirect(url_for('quiz_result' , quiz_id = quiz_id))
+        return redirect(url_for('quiz_results' , quiz_id = quiz_id))
     return render_template('attempt_quiz.html' , quiz = quiz , questions = questions)
 
 @app.route('/quiz_results/<int:quiz_id>')

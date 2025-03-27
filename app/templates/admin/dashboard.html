@@ -4,7 +4,9 @@
 <style>
    .chart-container {
         display: grid;
-        grid-template-columns: 2fr 1fr;
+        /* Define the grid layout with two columns: 
+           the first column takes twice the space of the second */
+        grid-template-columns: 2fr 1fr;  
     }
   
 </style>
@@ -26,39 +28,44 @@
 </div>
 
 <script>
-    // Explicitly parse JSON to prevent template errors
-    const quizData = {
-        names: {{ quiz_names|tojson|safe }},
-        scores: {{ average_scores|tojson|safe }},
-        completions: {{ completion_rates|tojson|safe }}
-    };
+    const ctx = document.getElementById('averageScoresChart');
+ 
+ new Chart(ctx, {
+     type: 'bar',
+     data: {
+         labels: {{ quiz_names|tojson }},
+         datasets: [{
+             label: 'Average Score',
+             data: {{ average_scores|tojson }},
+             borderWidth: 1
+         }]
+     },
+     options: {
+         scales: {
+             y: {
+                 beginAtZero: true
+             }
+         }
+     }
+ });
 
-    // Bar Chart
-    new Chart(document.getElementById('averageScoresChart'), {
-        type: 'bar',
-        data: {
-            labels: quizData.names,
-            datasets: [{
-                label: 'Average Score',
-                data: quizData.scores,
-                backgroundColor: 'rgba(255, 99, 132, 0.5)'
-            }]
-        }
-    });
+ const ctx1 = document.getElementById('completionRatesChart')
 
-    // Pie Chart 
-    new Chart(document.getElementById('completionRatesChart'), {
-        type: 'pie',
-        data: {
-            labels: quizData.names,
-            datasets: [{
-                data: quizData.completions,
-                backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56',
-                    '#4BC0C0', '#9966FF', '#FF9F40'
-                ]
-            }]
-        }
-    });
+ new Chart(ctx1, {
+     type: 'pie',
+     data: {
+         labels: {{ quiz_names|tojson }},
+         datasets: [{
+             label: 'Completion Rate',
+             data: {{ completion_rates|tojson }},
+             backgroundColor: [
+             'rgb(255, 99, 132)',
+             'rgb(54, 162, 235)',
+             'rgb(255, 205, 86)'
+             ],
+             hoverOffset: 4
+         }]
+     }
+ })
 </script>
 {% endblock %}

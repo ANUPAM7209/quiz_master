@@ -1,9 +1,24 @@
 {%extends "layout.html"%}
 {%block title%}Attempt Quiz: {{quiz.name}}{%endblock%}
 {%block content%}
+{% block head %}
+ {{ super() }}
+ <style>
+     .timer {
+         color: red;
+         font-size: 12px;
+     }
+ </style>
+ {% endblock %}
 <h2>{{quiz.name}}</h2>
 
-<form method="post">
+
+{% if quiz.time_duration > 0 %} <!-- we will show this record when no time is given  it get hidden -->
+<div class="timer">
+    <span id="timer">00:00</span>
+</div>
+{% endif %}
+<form id="quizForm" method="post">
     <div>
         {% for question in quiz.questions %}
         <div>
@@ -30,4 +45,29 @@
     </div>
     <button type = "submit"> Submit Quiz</button>
 </form>
+
+<script>
+    const quizDuration = {{ quiz.time_duration }};
+    if (quizDuration > 0) {
+        let timeLeft = quizDuration; // we take the timeleft variable because quizDuration value is coming from the quiz only . we to change the value again and again so we have to fetch the value from the quiz then put .
+
+        function updateTimer() { //we have to run this function every second so we have to update the timer.
+            let minutes = Math.floor(timeLeft / 60)
+            let seconds = timeLeft % 60 // after that we have to show the elements in id timer part.
+            document.getElementById("timer").textContent = `
+            ${minutes.toString().padStart(2, '0')}: 
+            ${seconds.toString().padStart(2, '0')}
+            `// string.padStart(targetLength, padString) . here min is 2 and if there is any blankspace then it fill with zero.
+            if (timeLeft <= 0) {
+                clearInterval(timeInterval); // if timeleft is zero then we have to clear this interval.
+                alert("Time's up! Your quiz will be submitted automatically.");
+                document.getElementById("quizForm").submit()
+            } else { // we have to reduce the time.
+                timeLeft--;
+            }
+        }
+
+        const timeInterval = setInterval(updateTimer, 1000) // we have to call this function in every seconds.
+    }
+</script>
 {%endblock%}

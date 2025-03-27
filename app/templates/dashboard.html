@@ -5,7 +5,6 @@
 
 <div>
     <h5>you can attempt any quiz based on your intrest from the list:</h5>
-    {%for quiz in quizzes %}
     <table>
         <thead>
             <tr>
@@ -13,6 +12,7 @@
             <th>Name</th>
             <th>Date of Quiz</th>
             <th>Time Duration</th>
+            <th></th>
             </tr>
         </thead>
         <tbody>
@@ -30,7 +30,6 @@
             {% endfor %}
         </tbody>
     </table>
-    {%endfor%}
 </div>
 
 {% endblock %}
